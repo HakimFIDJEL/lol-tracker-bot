@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 import requests
 import datetime
-from discord.ext import tasks # Import indispensable pour la loop
+from discord.ext import tasks
 
 # Load environment variables
 load_dotenv()
@@ -11,11 +11,10 @@ DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 RIOT_API_KEY = os.getenv('RIOT_API_KEY')
 USER_GAMENAME = os.getenv('USER_GAMENAME')
 USER_TAGLINE = os.getenv('USER_TAGLINE')
-# Conversion en INT pour l'ID du channel
+
 DISCORD_CHANNEL_ID = int(os.getenv('DISCORD_CHANNEL_ID'))
 DISCORD_USER_TO_PING_ID = os.getenv('DISCORD_USER_TO_PING_ID')
 
-# Variable globale pour se souvenir de la dernière partie traitée
 LAST_MATCH_ID = None
 
 # --- Fonctions Riot ---
@@ -112,6 +111,7 @@ async def send_match_report(matchDetails):
     )
     embed.set_footer(text=f"Fin : {matchDetails['gameEndTimestamp']}")
 
+    # Ping or not
     # await channel.send(content=f"<@{DISCORD_USER_TO_PING_ID}>", embed=embed)
     await channel.send(embed=embed)
 
@@ -128,7 +128,6 @@ async def monitor_lol():
     
     m_id = get_last_match_id(puuid)
     if m_id and m_id != LAST_MATCH_ID:
-        # C'est une nouvelle partie !
         details = get_match_details(m_id, puuid)
         if details:
             await send_match_report(details)
@@ -139,10 +138,8 @@ async def monitor_lol():
 async def on_ready():
     print(f'Bot connecté en tant que {client.user} !')
     
-    # On n'initialise plus LAST_MATCH_ID ici pour forcer l'affichage du dernier match au démarrage
     print("Surveillance active : vérification du dernier match en cours...")
     
-    # Lancement de la boucle
     if not monitor_lol.is_running():
         monitor_lol.start()
 

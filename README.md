@@ -13,5 +13,5 @@ To run with docker
 ```bash
 docker build -t lol-bot .
 
-docker run -d --restart always lol-bot
+docker run -d --name lol-bot --env-file .env --restart always lol-bot
 ```
