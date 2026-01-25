@@ -13,7 +13,12 @@ python bot.py
 To run with docker
 
 ```bash
+# First, build the container
 docker build -t lol-bot .
 
+# Then run it
 docker run -d --name lol-bot --env-file .env --restart always lol-bot
+
+# If needed, remove it
+docker rm -f lol-bot
 ```
