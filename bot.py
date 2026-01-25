@@ -7,6 +7,8 @@ from discord.ext import tasks
 
 # Load environment variables
 load_dotenv()
+ENVIRONNEMENT = os.getenv('ENVIRONMENT', 'testing')
+
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 RIOT_API_KEY = os.getenv('RIOT_API_KEY')
 USER_GAMENAME = os.getenv('USER_GAMENAME')
@@ -87,33 +89,27 @@ async def send_match_report(matchDetails):
 
     color = 0x2ecc71 if matchDetails['win'] else 0xe74c3c
     title = "🏆 Victoire !" if matchDetails['win'] else "💀 Défaite !"
-    
-    if matchDetails['win']:
-        desc = "Ils étaient autistes en face ?"
-    else:
-        if matchDetails['score'] < 30:
-            desc = f"Le neuille parmi les neuilles ({matchDetails['score']}/100). Un bon gros plot."
-        elif matchDetails['score'] < 50:
-            desc = "Bien guez, on s'y attendait un peu..."
-        else:
-            desc = "T'as joué ok, mais t'es quand même guez."
 
-    embed = discord.Embed(title=title, description=desc, color=color)
-    embed.set_author(name=f"Champion joué : {matchDetails['championName']}")
+    embed = discord.Embed(title=title, color=color)
+    embed.add_field(name=f"Champion joué", value=matchDetails['championName'], inline=True)
+    embed.add_field(name="Mode de jeu", value=matchDetails['queueId'], inline=True)
     embed.add_field(name="Poste", value=matchDetails['lane'], inline=True)
     embed.add_field(name="Score", value=f"**{matchDetails['score']}/100**", inline=True)
     embed.add_field(name="KDA", value=f"{matchDetails['kills']}/{matchDetails['deaths']}/{matchDetails['assists']}", inline=True)
     embed.add_field(name="Durée", value=f"{matchDetails['gameDuration']} min", inline=True)
-    embed.add_field(
-    name="FF ?", 
-        value="Oui (looser)" if matchDetails['gameEndedInSurrender'] else "Non", 
-        inline=True
-    )
+
+    if(matchDetails['win'] == False):
+        embed.add_field(
+            name="FF ?", 
+            value="Oui (looser)" if matchDetails['gameEndedInSurrender'] else "Non", 
+            inline=True
+        )
+    
     embed.set_footer(text=f"Fin : {matchDetails['gameEndTimestamp']}")
 
-    # Ping or not
-    # await channel.send(content=f"<@{DISCORD_USER_TO_PING_ID}>", embed=embed)
-    await channel.send(embed=embed)
+    content = f"<@{DISCORD_USER_TO_PING_ID}>" if DISCORD_USER_TO_PING_ID else None
+    await channel.send(content=content, embed=embed)
+
 
 # --- Initialisation Bot ---
 
@@ -127,12 +123,18 @@ async def monitor_lol():
     if not puuid: return
     
     m_id = get_last_match_id(puuid)
-    if m_id and m_id != LAST_MATCH_ID:
-        details = get_match_details(m_id, puuid)
-        if details:
-            await send_match_report(details)
-            LAST_MATCH_ID = m_id
-            print(f"Match {m_id} envoyé !")
+    details = get_match_details(m_id, puuid)
+
+    if details:
+        if ENVIRONNEMENT == 'testing':
+            # Prints the last match played    
+            print(f"[TESTING] Nouveau match détecté : {m_id}, détails : {details}")
+        else:
+            # Only display and send if it's a new match
+            if m_id and m_id != LAST_MATCH_ID:
+                await send_match_report(details)
+                print(f"Match {m_id} envoyé !")
+                LAST_MATCH_ID = m_id
 
 @client.event
 async def on_ready():
@@ -141,6 +143,7 @@ async def on_ready():
     print("Surveillance active : vérification du dernier match en cours...")
     
     if not monitor_lol.is_running():
+        print('Démarrage de la surveillance des matchs LoL...')
         monitor_lol.start()
 
 client.run(DISCORD_TOKEN)
