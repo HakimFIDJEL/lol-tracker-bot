@@ -101,7 +101,7 @@ async def send_match_report(matchDetails):
     if(matchDetails['win'] == False):
         embed.add_field(
             name="FF ?", 
-            value="Oui (looser)" if matchDetails['gameEndedInSurrender'] else "Non", 
+            value="Oui" if matchDetails['gameEndedInSurrender'] else "Non", 
             inline=True
         )
     
@@ -123,18 +123,17 @@ async def monitor_lol():
     if not puuid: return
     
     m_id = get_last_match_id(puuid)
-    details = get_match_details(m_id, puuid)
+    if not m_id or m_id == LAST_MATCH_ID:
+        return
 
+    details = get_match_details(m_id, puuid)
     if details:
         if ENVIRONNEMENT == 'testing':
-            # Prints the last match played    
-            print(f"[TESTING] Nouveau match détecté : {m_id}, détails : {details}")
+            print(f"[TESTING] Nouveau match détecté : {m_id}")
         else:
-            # Only display and send if it's a new match
-            if m_id and m_id != LAST_MATCH_ID:
-                await send_match_report(details)
-                print(f"Match {m_id} envoyé !")
-                LAST_MATCH_ID = m_id
+            await send_match_report(details)
+            print(f"Match {m_id} envoyé !")
+        LAST_MATCH_ID = m_id
 
 @client.event
 async def on_ready():
