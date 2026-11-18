@@ -1,0 +1,25 @@
+services:
+  bot:
+    image: ghcr.io/hakimfidjel/lol-tracker-bot:${APP_VERSION:?Définir APP_VERSION avec un tag publié}
+    env_file: .env
+    environment:
+      ENVIRONMENT: production
+      STATE_DIR: /data
+    restart: unless-stopped
+    init: true
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    volumes:
+      - bot_data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+    stop_grace_period: 30s
+
+volumes:
+  bot_data:

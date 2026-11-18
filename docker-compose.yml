@@ -1,0 +1,19 @@
+services:
+  bot:
+    build:
+      context: .
+      target: development
+    env_file: .env
+    environment:
+      ENVIRONMENT: testing
+      STATE_DIR: /data
+    volumes:
+      - ./bot.py:/app/bot.py:ro
+      - ./tracker:/app/tracker:ro
+      - ./tests:/app/tests:ro
+      - ./pyproject.toml:/app/pyproject.toml:ro
+      - bot_data:/data
+    init: true
+
+volumes:
+  bot_data:
