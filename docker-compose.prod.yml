@@ -1,6 +1,6 @@
 services:
   bot:
-    image: ghcr.io/hakimfidjel/discord-bot:${APP_VERSION:?Définir APP_VERSION avec un tag publié}
+    image: ghcr.io/hakimfidjel/lol-tracker-bot:${APP_VERSION:?Définir APP_VERSION avec un tag publié}
     env_file: .env
     environment:
       ENVIRONMENT: production

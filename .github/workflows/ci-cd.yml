@@ -57,7 +57,7 @@ jobs:
       - uses: docker/metadata-action@v5
         id: metadata
         with:
-          images: ghcr.io/hakimfidjel/discord-bot
+          images: ghcr.io/hakimfidjel/lol-tracker-bot
           tags: |
             type=ref,event=tag
             type=raw,value=latest
@@ -82,7 +82,7 @@ jobs:
     steps:
       - uses: dataaxiom/ghcr-cleanup-action@v1
         with:
-          packages: discord-bot
+          packages: lol-tracker-bot
           older-than: 30 days
           keep-n-tagged: 5
           delete-untagged: true
