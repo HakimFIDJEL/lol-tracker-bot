@@ -22,7 +22,7 @@ La CI vérifie les branches feature, develop, release, hotfix, main et les PR ve
 
 ## Production
 
-Le VPS conserve `/projects/lol-tracker-bot/docker-compose.yaml` (copie du Compose prod), un `.env` en mode `0600`, et un volume Docker pour l'état. Aucun source Python ni outil de compilation n'est nécessaire sur le VPS.
+Le VPS conserve `/srv/hosting/projects/lol-tracker-bot/docker-compose.yaml` (copie du Compose prod), un `.env` en mode `0600`, et un volume Docker pour l'état. Aucun source Python ni outil de compilation n'est nécessaire sur le VPS. L'ancienne racine `/projects` a été supprimée lors de la réorganisation de l'hébergement.
 
 Configurer `APP_VERSION` avec un tag effectivement publié, jamais un exemple non publié. Le paquet est `ghcr.io/hakimfidjel/lol-tracker-bot`. Pour un paquet privé, le serveur doit être authentifié à GHCR avec une permission de lecture seule.
 
@@ -38,7 +38,7 @@ docker compose -f docker-compose.yaml logs --tail 100 bot
 
 Ce remplacement impose une brève interruption et garantit qu'une seule instance surveille les matchs. Ne pas utiliser `docker rollout`. Conserver le même nom de projet Compose pour réutiliser le volume. Ne jamais utiliser `down --volumes` lors d'une mise à jour. Pour revenir en arrière, remettre la version précédente dans `APP_VERSION` et répéter ces commandes ; ne pas purger immédiatement son image.
 
-La CI prépare et publie l'image ; elle ne déclenche pas encore le webhook partagé. Son adaptation doit gérer le remplacement d'une instance unique, puis être validée séparément sur le VPS.
+La CI prépare et publie l'image ; elle ne déclenche pas encore le webhook partagé. Le déployeur VPS est adapté et testé sur `v1.0.0` : `DEPLOYMENT_MODE=replace` dans le `.env` impose le remplacement à instance unique. Son dossier est `/srv/hosting/infrastructure/webhooks` et son `PROJECTS_ROOT` vaut `/srv/hosting/projects`. L'envoi de la notification depuis GitHub Actions reste à raccorder séparément.
 
 ## Fiabilité et état
 
